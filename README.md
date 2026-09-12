@@ -2,29 +2,7 @@
 
 A small, portable Markdown editor with a live MathJax preview. Plain HTML, CSS, and JavaScript: no framework, npm install, compilation, API key, or backend required.
 
-## Run it
-
-In the downloadable source ZIP, open `index.html` directly in a modern desktop browser. All JavaScript libraries are included in `vendor/`; the editor itself does not need a CDN. In the original Sites checkout, the same files live in `dist/`.
-
-You can also serve the folder with any static web server. For example, from the extracted ZIP:
-
-```sh
-python3 -m http.server 8080
-```
-
-Then open `http://localhost:8080`.
-
-## Put it on GitHub Pages
-
-1. Create a GitHub repository and upload the **contents** of the extracted source folder. `index.html`, `.nojekyll`, `app.js`, `styles.css`, and the `vendor` folder should be at the repository root. Include the license files too.
-2. Open **Settings → Pages**.
-3. Under **Build and deployment**, select **Deploy from a branch**.
-4. Select **main** and **/(root)**, then **Save**.
-5. GitHub will show the website address when publishing finishes.
-
-All asset paths are relative, so both `username.github.io` and `username.github.io/repository-name/` work without editing the code. This folder can also be hosted by any other static host.
-
-[GitHub’s publishing instructions](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
+[Open Markdown to Go](https://lacerbi.github.io/markdown2go/).
 
 ## Use it
 
@@ -67,8 +45,14 @@ References: [markdown-it options](https://markdown-it.github.io/markdown-it/inte
 
 ## Development checks
 
+To run locally, open `index.html` in a modern desktop browser. All JavaScript libraries are included in `vendor/`.
+
 With Node.js 22.12+ or 24+ installed, run `npm ci` and `npm test`. The tests check Markdown parsing, image descriptions, unsafe input, and MathJax rendering across document edits and clears. Node.js and the test dependencies are only needed for development. Browser layout and PDF pagination should also be checked in a browser.
 
 ## PDF scope
 
 PDF export uses the browser’s native print engine; it opens a dialog instead of silently downloading a PDF. Equations are SVG and document text remains selectable. Pagination can vary by browser, page size, and font. Very wide tables, long code lines, and oversized equations may require landscape orientation or a lower print scale. A fully automatic PDF download would require an additional PDF-generation library or service.
+
+## License
+
+[MIT](LICENSE).
