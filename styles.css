@@ -8,9 +8,9 @@
 .app-header{height:64px;gap:20px;padding:0 2%;position:relative;z-index:2}
 .brand{font-size:18px;gap:10px;flex-shrink:0}
 .brand-mark{height:32px;width:48px;font-size:24px}.brand-mark sup{align-self:flex-start;margin-top:4px;font-size:12px;line-height:1}.brand-mark span{font-size:20px;margin-left:1px}
-.document-name{min-width:0;flex:0 1 180px}
+.document-name{min-width:0;flex:0 1 320px}
 .document-name>div{font-size:16px;letter-spacing:0;gap:4px}
-.document-name input{width:140px;max-width:100%;min-width:50px;color:#f2f3f8;font-size:16px;font-weight:450;padding:6px 0}
+.document-name input{width:280px;max-width:100%;min-width:50px;color:#f2f3f8;font-size:16px;font-weight:450;padding:6px 0}
 .document-name>div>span{color:#a8adbf;font-size:14px}
 .view-switch{flex-shrink:0;background:#303440;border-color:#444959}
 .view-switch button{color:#c4c8d7;padding:6px 12px}
