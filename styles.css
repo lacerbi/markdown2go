@@ -4,6 +4,8 @@
 @media(min-width:1700px){#editor{font-size:16px}.prose{font-size:19px}}
 @media(max-width:850px){.pane-heading>span:last-child:not(:first-child){max-width:48%;text-align:right}.pane-heading{padding:10px 15px}#editor{padding:22px 18px}.preview-scroll{padding:25px}.prose h1{font-size:29px}}
 @media(max-width:600px){.app-header{height:65px;padding:0 18px}.brand{font-size:17px;gap:9px}.brand-mark{width:32px;height:32px}main{padding:22px 16px}.workspace-bar{align-items:flex-start;flex-wrap:wrap;gap:18px}.document-name input{width:180px;max-width:70vw}.actions{width:100%}.button{flex:1;padding:0 10px}.view-switch button{padding:7px 10px}.workspace{height:680px;min-height:400px}.workspace[data-view=split]{grid-template-columns:1fr;grid-template-rows:1fr 1fr}.workspace[data-view=split] .editor-pane{border-right:0;border-bottom:1px solid var(--border)}.workspace[data-view=split] .pane-footer{display:none}.workspace:not([data-view=split]){height:calc(100dvh - 300px)}.pane-heading{min-height:42px}.preview-scroll{padding:23px}.prose{font-size:16px}.prose h1{font-size:27px}}
+.diagram{margin:1.2em 0;text-align:center;overflow-x:auto;line-height:normal}.diagram>svg{display:block;max-width:100%;height:auto;margin:auto}.diagram-stage{position:fixed;left:-100000px;top:0;width:1200px;visibility:hidden;pointer-events:none}.diagram-error-message{color:#b53b44;font-size:.9em}
+@media print{.diagram{break-inside:avoid;overflow:visible}.diagram-stage{display:none}}
 /* Compact toolbar: one row on desktop; wrap controls on small screens. */
 .app-header{height:64px;gap:20px;padding:0 2%;position:relative;z-index:2}
 .brand{font-size:18px;gap:10px;flex-shrink:0}

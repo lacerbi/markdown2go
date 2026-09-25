@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const vm = require('node:vm');
 const { test } = require('node:test');
 const { JSDOM, VirtualConsole } = require('jsdom');
 
@@ -20,7 +21,7 @@ test('math rendering follows the current document and reports invalid commands',
   const { window } = dom;
   const { document } = window;
   for (const script of document.querySelectorAll('script[src]')) {
-    window.eval(fs.readFileSync(path.join(root, script.getAttribute('src')), 'utf8'));
+    vm.runInContext(fs.readFileSync(path.join(root, script.getAttribute('src')), 'utf8'), dom.getInternalVMContext());
   }
   await window.MathJax.startup.promise;
   const editor = document.querySelector('#editor');
@@ -68,6 +69,10 @@ test('math rendering follows the current document and reports invalid commands',
   assert([...document.querySelectorAll('style')].some(style =>
     style.textContent.includes('mjx-assistive-mml') && style.textContent.includes('clip:')
   ));
+
+  render(String.raw`LLM Processes \[1\], probes \[2\], and $$1$$.`);
+  assert.equal(preview.querySelectorAll('mjx-container').length, 1);
+  assert.match(preview.textContent, /LLM Processes \[1\], probes \[2\]/);
 
   render('example.com and user@example.com');
   assert.equal(preview.querySelectorAll('a').length, 2);

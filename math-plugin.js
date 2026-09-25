@@ -17,6 +17,9 @@
       }
       return -1;
     }
+    function isCitation(content) {
+      return /^\s*\d+(?:\s*[-–—]\s*\d+)?(?:\s*[,;]\s*\d+(?:\s*[-–—]\s*\d+)?)*\s*$/.test(content);
+    }
     function placeholder(tex, display, env) {
       env.math = env.math || [];
       const id = env.math.push({ tex, display }) - 1;
@@ -45,6 +48,7 @@
         pos = closing(raw, close, open.length);
       }
       if (pos < 0 || raw.slice(pos + close.length).trim()) return false;
+      if (open === '\\[' && isCitation(raw.slice(open.length, pos))) return false;
       if (silent) return true;
       const token = state.push('math_block', '', 0);
       token.content = keep ? raw.slice(0, pos + close.length) : raw.slice(open.length, pos);
@@ -66,6 +70,7 @@
       }
       if (end < 0 || end === pos + open.length) return false;
       const content = src.slice(pos + open.length, end);
+      if (open === '\\[' && isCitation(content)) return false;
       if (!display && content.includes('\n')) return false;
       if (!silent) {
         const token = state.push('math_inline', '', 0);

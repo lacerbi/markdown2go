@@ -8,6 +8,7 @@
   const filename = document.querySelector('#filename');
   const toast = document.querySelector('#toast');
   let timer, toastTimer, mathReady = false, renderedSource = null;
+  let renderVersion = 0, diagramId = 0, pendingRender = Promise.resolve();
   editor.value = '';
   let md;
   function notify(message) {
@@ -40,12 +41,51 @@
     const words = text ? text.split(/\s+/u).length : 0;
     document.querySelector('#counts').textContent = `${words.toLocaleString()} words · ${editor.value.length.toLocaleString()} characters`;
   }
+  function renderStatus(errors, diagramErrors) {
+    const messages = [];
+    if (errors) messages.push(`${errors} equation${errors === 1 ? '' : 's'} to check`);
+    if (diagramErrors) messages.push(`${diagramErrors} diagram${diagramErrors === 1 ? '' : 's'} to check`);
+    return messages.join(', ') || (mathReady ? 'Up to date' : 'Math unavailable');
+  }
+  async function renderDiagrams(nodes, version, errors, hasMath) {
+    let diagramErrors = 0;
+    if (document.fonts) await document.fonts.ready;
+    for (const node of nodes) {
+      if (version !== renderVersion) return;
+      const stage = document.createElement('div');
+      stage.className = 'diagram-stage';
+      stage.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(stage);
+      try {
+        const { svg } = await window.mermaid.render('diagram-' + ++diagramId, node.textContent, stage);
+        if (version !== renderVersion) return;
+        const diagram = document.createElement('div');
+        diagram.className = 'diagram';
+        diagram.innerHTML = svg;
+        node.parentElement.replaceWith(diagram);
+      } catch (error) {
+        if (version !== renderVersion) return;
+        diagramErrors++;
+        node.parentElement.classList.add('diagram-error');
+        const message = document.createElement('p');
+        message.className = 'diagram-error-message';
+        message.textContent = window.mermaid ? 'Diagram could not render. Check its Mermaid syntax.' : 'Diagram rendering is unavailable. Reload the page to try again.';
+        node.parentElement.before(message);
+      } finally {
+        stage.remove();
+      }
+    }
+    if (version !== renderVersion) return;
+    status.textContent = renderStatus(errors, diagramErrors);
+    pdfButton.disabled = !mathReady && hasMath;
+  }
   function render() {
     clearTimeout(timer);
     count();
     if (!md) return;
     const source = editor.value;
-    if (source === renderedSource) return;
+    if (source === renderedSource) return pendingRender;
+    const version = ++renderVersion;
     const scroll = preview.parentElement.scrollTop;
     const env = { math: [] };
     try {
@@ -73,13 +113,21 @@
       fragment.querySelectorAll('a').forEach(link => { link.target = '_blank'; link.rel = 'noopener noreferrer'; });
       preview.replaceChildren(...fragment.childNodes);
       preview.parentElement.scrollTop = scroll;
-      status.textContent = errors ? `${errors} equation${errors === 1 ? '' : 's'} to check` : mathReady ? 'Up to date' : 'Math unavailable';
+      status.textContent = renderStatus(errors, 0);
       renderedSource = source;
       pdfButton.disabled = !mathReady && env.math.length > 0;
+      const diagrams = [...preview.querySelectorAll('pre > code.language-mermaid')];
+      pendingRender = Promise.resolve();
+      if (diagrams.length) {
+        status.textContent = 'Rendering diagrams…';
+        pdfButton.disabled = true;
+        pendingRender = renderDiagrams(diagrams, version, errors, env.math.length > 0);
+      }
     } catch (error) {
       status.textContent = 'Preview could not render';
       pdfButton.disabled = true;
     }
+    return pendingRender;
   }
   document.querySelector('#download-md').addEventListener('click', () => {
     const url = URL.createObjectURL(new Blob([editor.value], { type: 'text/markdown;charset=utf-8' }));
@@ -90,7 +138,13 @@
     notify('Markdown download started.');
   });
   pdfButton.addEventListener('click', async () => {
-    render();
+    let version;
+    do {
+      const rendering = render();
+      version = renderVersion;
+      await rendering;
+      if (version === renderVersion && pdfButton.disabled) return;
+    } while (version !== renderVersion || renderedSource !== editor.value);
     if (pdfButton.disabled) return;
     // Wait for user-linked images so print does not silently omit slow images.
     pdfButton.disabled = true;
@@ -109,6 +163,10 @@
       notify('An image could not load. Check its URL before exporting.'); return;
     }
     if (document.fonts) await document.fonts.ready;
+    if (version !== renderVersion || renderedSource !== editor.value) {
+      notify('The document changed while preparing your PDF. Please export again.');
+      return;
+    }
     const title = document.title;
     document.title = documentName();
     window.print();
@@ -167,6 +225,17 @@
     preview.textContent = 'The Markdown library could not load. Reload this page to try again. Your source is still available to download.';
     count();
     return;
+  }
+  if (window.mermaid) {
+    window.mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'strict',
+      suppressErrorRendering: true,
+      htmlLabels: false,
+      fontFamily: 'Arial, sans-serif',
+      secure: ['secure', 'securityLevel', 'startOnLoad', 'maxTextSize', 'maxEdges',
+        'suppressErrorRendering', 'htmlLabels', 'flowchart', 'fontFamily', 'themeCSS']
+    });
   }
   render();
   if (window.MathJax?.startup?.promise) {

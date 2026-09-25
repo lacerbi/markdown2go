@@ -32,6 +32,23 @@ test('image descriptions preserve math, formatting text and escaping', () => {
   assert.match(md.render('![outer ![inner $x$](a.png)](b.png)'), /alt="outer inner x"/);
 });
 
+test('numeric bracket citations stay literal while explicit equations render', () => {
+  for (const citation of ['1', '23', '1, 3', '2-5', '1, 3–5', '1; 4—6']) {
+    for (const source of [String.raw`\[${citation}\]`, String.raw`See \[${citation}\] for details.`, `[${citation}]`]) {
+      const env = { math: [] };
+      const html = md.render(source, env);
+      assert.deepEqual(env.math, [], source);
+      assert(html.includes(`[${citation}]`), source);
+    }
+  }
+  const env = { math: [] };
+  const html = md.render(String.raw`See \[1\], then \[x^2\], $$1$$ and $1$.`, env);
+  assert(html.includes('[1]'));
+  assert.deepEqual(env.math.map(item => item.tex), ['x^2', '1', '1']);
+  assert.match(md.render(String.raw`\[1\]` + '\n\n' + String.raw`\[x^2\]`), /<p>\[1\]<\/p>/);
+  assert.match(md.render('`\\[1\\]`'), /<code>\\\[1\\\]<\/code>/);
+});
+
 test('raw HTML and unsafe links remain inert', () => {
   assert(!md.render('<script>alert(1)</script>').includes('<script>'));
   assert(!md.render('[click](javascript:alert(1))').includes('href='));
